@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de Budget avec Onglets</title>
+    <style>
+        /* Styles pour la page de connexion */
+        #password-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        .password-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .password-container h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .password-container input {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .password-container button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .password-container button:hover {
+            background-color: #2980b9;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        /* Styles existants pour l'application */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+        
+        .metric {
+            flex: 1;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            background-color: white;
+        }
+        
+        .metric h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: #2c3e50;
+        }
+        
+        .montant {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .recettes {
+            border-top: 5px solid #2ecc71;
+        }
+        
+        .depenses {
+            border-top: 5px solid #e74c3c;
+        }
+        
+        .solde {
+            border-top: 5px solid #3498db;
+        }
+        
+        .positif {
+            color: #2ecc71;
+        }
+        
+        .negatif {
+            color: #e74c3c;
+        }
+        
+        .tabs-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .tabs-header {
+            display: flex;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab-btn {
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+            background-color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .description-cell {
+            width: 40%;
+        }
+        
+        .montant-cell {
+            width: 25%;
+            font-weight: 500;
+        }
+        
+        .action-cell {
+            width: 15%;
+        }
+        
+        .add-form-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .add-form-container h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, button, select {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 100%;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .delete-btn {
+            background-color: #e74c3c;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .input-hint {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .export-btn {
+            background-color: #9b59b6;
+            display: block;
+            margin: 0 auto;
+            max-width: 250px;
+        }
+        
+        .export-btn:hover {
+            background-color: #8e44ad;
+        }
+        
+        .instructions {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .instructions h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 900px) {
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .dashboard {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Page de mot de passe -->
+    <div id="password-page">
+        <div class="password-container">
+            <h2>Accès protégé</h2>
+            <p>Veuillez entrer le mot de passe pour accéder à l'application</p>
+            <input type="password" id="password-input" placeholder="Mot de passe">
+            <button id="password-submit">Accéder</button>
+            <div class="error-message" id="password-error">Mot de passe incorrect. Veuillez réessayer.</div>
+        </div>
+    </div>
+    
+    <!-- Contenu de l'application (caché initialement) -->
+    <div id="app-content" style="display: none;">
+        <header>
+            <h1>Gestionnaire de Budget Personnel</h1>
+            <p class="subtitle">By Hamid Horine Borgou ---> @ tous droits reservés.</p>
+        </header>
+        
+        <div class="dashboard">
+            <div class="metric recettes">
+                <h3>Total Recettes</h3>
+                <div id="total-recettes" class="montant">0 FCFA</div>
+            </div>
+            <div class="metric depenses">
+                <h3>Total Dépenses</h3>
+                <div id="total-depenses" class="montant">0 FCFA</div>
+            </div>
+            <div class="metric solde">
+                <h3>Solde</h3>
+                <div id="solde" class="montant">0 FCFA</div>
+            </div>
+        </div>
+        
+        <div class="add-form-container">
+            <h2>Ajouter une nouvelle transaction</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="type-transaction">Type</label>
+                    <select id="type-transaction">
+                        <option value="recette">Recette</option>
+                        <option value="depense">Dépense</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="date-transaction">Date</label>
+                    <input type="date" id="date-transaction" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="description-transaction">Description</label>
+                    <input type="text" id="description-transaction" placeholder="Description" required>
+                </div>
+                <div class="form-group">
+                    <label for="montant-transaction">Montant (FCFA)</label>
+                    <input type="text" id="montant-transaction" placeholder="Ex: 10 000 000" required>
+                    <p class="input-hint">Utilisez espaces, points ou rien comme séparateur</p>
+                </div>
+            </div>
+            <button id="ajouter-transaction">Ajouter la transaction</button>
+        </div>
+        
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="recettes">Historique des Recettes</button>
+                <button class="tab-btn" data-tab="depenses">Historique des Dépenses</button>
+            </div>
+            
+            <div class="tab-content active" id="recettes-tab">
+                <table id="table-recettes">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th class="description-cell">Description</th>
+                            <th class="montant-cell">Montant (FCFA)</th>
+                            <th class="action-cell">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Les lignes seront ajoutées dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="tab-content" id="depenses-tab">
+                <table id="table-depenses">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th class="description-cell">Description</th>
+                            <th class="montant-cell">Montant (FCFA)</th>
+                            <th class="action-cell">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Les lignes seront ajoutées dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <button id="exporter-data" class="export-btn">Exporter les données</button>
+    </div>
+    
+    <script>
+        // Gestion du mot de passe
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordPage = document.getElementById('password-page');
+            const appContent = document.getElementById('app-content');
+            const passwordInput = document.getElementById('password-input');
+            const passwordSubmit = document.getElementById('password-submit');
+            const passwordError = document.getElementById('password-error');
+            
+            // Vérifier si l'utilisateur est déjà authentifié
+            const isAuthenticated = localStorage.getItem('budgetAuthenticated');
+            if (isAuthenticated === 'true') {
+                passwordPage.style.display = 'none';
+                appContent.style.display = 'block';
+                initializeApp();
+            }
+            
+            // Gérer la soumission du mot de passe
+            passwordSubmit.addEventListener('click', function() {
+                const password = passwordInput.value;
+                if (password === 'Borgou##1997@@') {
+                    // Mot de passe correct
+                    localStorage.setItem('budgetAuthenticated', 'true');
+                    passwordPage.style.display = 'none';
+                    appContent.style.display = 'block';
+                    initializeApp();
+                } else {
+                    // Mot de passe incorrect
+                    passwordError.style.display = 'block';
+                    passwordInput.value = '';
+                    setTimeout(function() {
+                        passwordError.style.display = 'none';
+                    }, 3000);
+                }
+            });
+            
+            // Permettre la soumission avec la touche Entrée
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    passwordSubmit.click();
+                }
+            });
+        });
+        
+        // Initialiser l'application après authentification
+        function initializeApp() {
+            // Initialiser les données
+            let recettes = JSON.parse(localStorage.getItem('recettes')) || [];
+            let depenses = JSON.parse(localStorage.getItem('depenses')) || [];
+            
+            // Éléments du DOM
+            const tableRecettes = document.getElementById('table-recettes');
+            const tableDepenses = document.getElementById('table-depenses');
+            const totalRecettesElement = document.getElementById('total-recettes');
+            const totalDepensesElement = document.getElementById('total-depenses');
+            const soldeElement = document.getElementById('solde');
+            
+            // Initialiser l'affichage
+            afficherRecettes();
+            afficherDepenses();
+            calculerTotaux();
+            
+            // Gestion des onglets
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Désactiver tous les onglets
+                    document.querySelectorAll('.tab-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // Activer l'onglet cliqué
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Formater l'entrée monétaire en temps réel
+            document.getElementById('montant-transaction').addEventListener('input', function(e) {
+                formatCurrencyInput(e.target);
+            });
+            
+            // Gestionnaire d'événement pour l'ajout de transaction
+            document.getElementById('ajouter-transaction').addEventListener('click', function() {
+                const type = document.getElementById('type-transaction').value;
+                const date = document.getElementById('date-transaction').value;
+                const description = document.getElementById('description-transaction').value;
+                const montantInput = document.getElementById('montant-transaction').value;
+                
+                if (date && description && montantInput) {
+                    // Nettoyer la valeur en enlevant tous les séparateurs
+                    const montantNettoye = montantInput.replace(/[\s\.]/g, '');
+                    const montant = parseFloat(montantNettoye);
+                    
+                    if (!isNaN(montant) && montant > 0) {
+                        const nouvelleTransaction = {
+                            id: Date.now(),
+                            date: date,
+                            description: description,
+                            montant: montant
+                        };
+                        
+                        if (type === 'recette') {
+                            recettes.push(nouvelleTransaction);
+                        } else {
+                            depenses.push(nouvelleTransaction);
+                        }
+                        
+                        sauvegarderDonnees();
+                        afficherRecettes();
+                        afficherDepenses();
+                        calculerTotaux();
+                        
+                        // Réinitialiser le formulaire
+                        document.getElementById('date-transaction').value = '';
+                        document.getElementById('description-transaction').value = '';
+                        document.getElementById('montant-transaction').value = '';
+                        
+                        // Afficher une notification
+                        showNotification(`${type === 'recette' ? 'Recette' : 'Dépense'} ajoutée avec succès!`);
+                    } else {
+                        alert('Veuillez saisir un montant valide (ex: 10000000, 10 000 000 ou 10.000.000).');
+                    }
+                } else {
+                    alert('Veuillez remplir tous les champs.');
+                }
+            });
+            
+            // Exporter les données
+            document.getElementById('exporter-data').addEventListener('click', function() {
+                exporterDonnees();
+            });
+            
+            // Fonction pour afficher les recettes
+            function afficherRecettes() {
+                const tbody = tableRecettes.querySelector('tbody');
+                tbody.innerHTML = '';
+                
+                // Trier par date (la plus récente en premier)
+                recettes.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                if (recettes.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="4" style="text-align: center; padding: 20px; color: #7f8c8d;">Aucune recette enregistrée</td>`;
+                    tbody.appendChild(row);
+                    return;
+                }
+                
+                recettes.forEach(recette => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${formatDate(recette.date)}</td>
+                        <td>${recette.description}</td>
+                        <td>${formatMontant(recette.montant)}</td>
+                        <td><button class="delete-btn" data-id="${recette.id}" data-type="recette">Supprimer</button></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                // Ajouter les écouteurs d'événements pour les boutons de suppression
+                document.querySelectorAll('.delete-btn[data-type="recette"]').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        recettes = recettes.filter(r => r.id !== id);
+                        sauvegarderDonnees();
+                        afficherRecettes();
+                        calculerTotaux();
+                        showNotification('Recette supprimée avec succès!');
+                    });
+                });
+            }
+            
+            // Fonction pour afficher les dépenses
+            function afficherDepenses() {
+                const tbody = tableDepenses.querySelector('tbody');
+                tbody.innerHTML = '';
+                
+                // Trier par date (la plus récente en premier)
+                depenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                if (depenses.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="4" style="text-align: center; padding: 20px; color: #7f8c8d;">Aucune dépense enregistrée</td>`;
+                    tbody.appendChild(row);
+                    return;
+                }
+                
+                depenses.forEach(depense => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${formatDate(depense.date)}</td>
+                        <td>${depense.description}</td>
+                        <td>${formatMontant(depense.montant)}</td>
+                        <td><button class="delete-btn" data-id="${depense.id}" data-type="depense">Supprimer</button></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                // Ajouter les écouteurs d'événements pour les boutons de suppression
+                document.querySelectorAll('.delete-btn[data-type="depense"]').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        depenses = depenses.filter(d => d.id !== id);
+                        sauvegarderDonnees();
+                        afficherDepenses();
+                        calculerTotaux();
+                        showNotification('Dépense supprimée avec succès!');
+                    });
+                });
+            }
+            
+            // Fonction pour calculer les totaux
+            function calculerTotaux() {
+                const totalRecettes = recettes.reduce((total, recette) => total + recette.montant, 0);
+                const totalDepenses = depenses.reduce((total, depense) => total + depense.montant, 0);
+                const solde = totalRecettes - totalDepenses;
+                
+                totalRecettesElement.textContent = formatMontant(totalRecettes);
+                totalDepensesElement.textContent = formatMontant(totalDepenses);
+                soldeElement.textContent = formatMontant(solde);
+                
+                // Changer la couleur selon si le solde est positif ou négatif
+                if (solde >= 0) {
+                    soldeElement.className = 'montant positif';
+                } else {
+                    soldeElement.className = 'montant negatif';
+                }
+            }
+            
+            // Fonction pour sauvegarder les données dans le localStorage
+            function sauvegarderDonnees() {
+                localStorage.setItem('recettes', JSON.stringify(recettes));
+                localStorage.setItem('depenses', JSON.stringify(depenses));
+            }
+            
+            // Fonction pour formater la date
+            function formatDate(dateStr) {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('fr-FR');
+            }
+            
+            // Fonction pour formater le montant en FCFA
+            function formatMontant(montant) {
+                return montant.toLocaleString('fr-FR') + ' FCFA';
+            }
+            
+            // Fonction pour formater l'entrée de devise
+            function formatCurrencyInput(input) {
+                // Sauvegarder la position du curseur
+                const cursorPosition = input.selectionStart;
+                
+                // Obtenir la valeur et supprimer tout sauf les chiffres
+                let value = input.value.replace(/[^\d]/g, '');
+                
+                // Formater avec des séparateurs d'espace
+                if (value.length > 0) {
+                    // Convertir en nombre
+                    const numericValue = parseInt(value, 10);
+                    
+                    // Formater avec des séparateurs d'espace
+                    input.value = numericValue.toLocaleString('fr-FR');
+                    
+                    // Restaurer la position du curseur
+                    // On estime la nouvelle position en fonction des séparateurs ajoutés
+                    const separatorsAdded = Math.floor((input.value.length - value.length) / 3);
+                    input.setSelectionRange(cursorPosition + separatorsAdded, cursorPosition + separatorsAdded);
+                }
+            }
+            
+            // Fonction pour exporter les données
+            function exporterDonnees() {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                    recettes: recettes,
+                    depenses: depenses,
+                    exportéLe: new Date().toISOString()
+                }, null, 2));
+                
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "budget_data.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                
+                showNotification('Données exportées avec succès!');
+            }
+            
+            // Fonction pour afficher une notification
+            function showNotification(message, isSuccess = true) {
+                // Créer l'élément de notification s'il n'existe pas
+                let notification = document.getElementById('data-notification');
+                if (!notification) {
+                    notification = document.createElement('div');
+                    notification.id = 'data-notification';
+                    notification.style.position = 'fixed';
+                    notification.style.bottom = '20px';
+                    notification.style.right = '20px';
+                    notification.style.padding = '15px 20px';
+                    notification.style.borderRadius = '6px';
+                    notification.style.color = 'white';
+                    notification.style.zIndex = '1000';
+                    notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                    document.body.appendChild(notification);
+                }
+                
+                // Configurer et afficher la notification
+                notification.textContent = message;
+                notification.style.backgroundColor = isSuccess ? '#2ecc71' : '#e74c3c';
+                notification.style.display = 'block';
+                
+                // Cacher la notification après 3 secondes
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Définir la date du jour par défaut dans le champ date
+            const aujourdhui = new Date().toISOString().split('T')[0];
+            document.getElementById('date-transaction').value = aujourdhui;
+        }
+    </script>
+</body>
+</html>
